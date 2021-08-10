@@ -1,0 +1,23 @@
+{
+  "name": "extract-dv-and-encode",
+  "version": "1.0.0",
+  "description": "A simple script to extract the DV metadata from video streams and then encode with the given settings",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jin-Kazama-Production/extract-DV-and-encode.git"
+  },
+  "keywords": [],
+  "author": "Michelangelo1337",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jin-Kazama-Production/extract-DV-and-encode/issues"
+  },
+  "homepage": "https://github.com/Jin-Kazama-Production/extract-DV-and-encode#readme",
+  "dependencies": {
+    "chalk": "^4.1.2"
+  }
+}
