@@ -85,7 +85,7 @@ const fs = require("fs");
       videosPath,
       vpyFile,
       getDVMetaData[index],
-      `${outPutPath}/Encode.${getH265Files[index]}`
+      `${outPutPath}/${getH265Files[index].encode.265}`
     );
   });
 })();
