@@ -4,6 +4,7 @@ const { findFiles } = require("./module/getFiles");
 const { videosPath, doviToolPath } = require("./config.json");
 const { extractDV } = require("./module/extract_dovi");
 const { encodeEpisodes } = require("./module/encodeEpisodes");
+const chalk = require("chalk");
 const fs = require("fs");
 
 (async function () {
