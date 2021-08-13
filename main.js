@@ -1,34 +1,50 @@
 // Make sure that you have your vpy scripts, episodes and DV metadata in one folder. The script will scan the folder recursively and check for the files and if everything is okay it will start immediatly
 
+let path = process.argv[2];
 const { findFiles } = require("./module/getFiles");
-const { videosPath, doviToolPath } = require("./config.json");
-const { extractDV } = require("./module/extract_dovi");
+const { extract } = require("./module/extract_dovi");
 const { encodeEpisodes } = require("./module/encodeEpisodes");
 const chalk = require("chalk");
 const fs = require("fs");
+const doviToolPath = "dovi_tool.exe" || "";
 
 (async function () {
+  if (path === undefined) {
+    console.log(
+      chalk.yellow("[Warning]") +
+        " You did not specify a path argument, I will use the current directory instead"
+    );
+
+    path = __dirname;
+  }
+
   // Get H265 files that we need
 
-  const getH265Files = findFiles(videosPath, ".h265");
-  if (!getH265Files) return console.log("Faild to find any H265 video streams");
+  const getH265Files = findFiles(path, ".mkv");
+  console.log(getH265Files);
+  if (getH265Files.length <= 0)
+    return console.log("Faild to find any H265 video streams");
 
   console.log("============================================");
   console.log(
-    chalk.cyan("[LOG] ") + "Found H265 Streams!\nExtracting DV Metdata......."
+    chalk.cyan("[LOG] ") +
+      "Found H265 Streams!" +
+      "\n" +
+      chalk.cyan("[LOG] ") +
+      "Extracting DV Metdata......."
   );
 
   // First extract the DV metadata from the Files
 
   getH265Files.forEach(async (episode) => {
-    if (!fs.existsSync(`${videosPath}/${episode}.bin`))
-      return await extractDV(videosPath, doviToolPath, episode);
+    if (!fs.existsSync(`${path}/${episode}.bin`))
+      return await extract.DolbyVision(path, episode, doviToolPath);
   });
 
   // get all vpy scripts and DV metadata files
 
-  const getVPY = findFiles(videosPath, ".vpy");
-  const getDVMetaData = findFiles(videosPath, ".bin");
+  const getVPY = findFiles(path, ".vpy");
+  const getDVMetaData = findFiles(path, ".bin");
 
   // check if they exist, otherwise return
 
@@ -52,7 +68,7 @@ const fs = require("fs");
 
   // create output folder and check if it exists..
 
-  const outPutPath = `${videosPath}/enocodeOutput`;
+  const outPutPath = `${path}/enocodeOutput`;
 
   if (fs.existsSync(outPutPath)) {
     console.log(
@@ -82,7 +98,7 @@ const fs = require("fs");
     console.log("============================================");
 
     await encodeEpisodes(
-      videosPath,
+      path,
       vpyFile,
       getDVMetaData[index],
       `${outPutPath}/${getH265Files[index]}.encode.265`
