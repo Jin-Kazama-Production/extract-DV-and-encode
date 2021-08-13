@@ -18,6 +18,8 @@ const { encodeEpisodes } = require("./module/encodeEpisodes");
 
 const doviToolPath = "dovi_tool.exe" || "";
 const ffprobe = "ffprobe" || "";
+const mkvextract = "mkvextract" || "";
+const temp = `${path}/temp/`;
 
 (async function () {
   if (path === undefined) {
@@ -29,11 +31,46 @@ const ffprobe = "ffprobe" || "";
     path = __dirname;
   }
 
+  // Extract H.265 streams from MKV
+
+  const getMKVs = findFiles(path, ".mkv");
+
+  console.log(
+    chalk.cyan("[LOG] ") + "Looking for MKV Files to extract the video Streams!"
+  );
+
+  if (fs.existsSync(temp)) {
+    console.log(
+      chalk.yellow("[WARNING]") +
+        ` The target folder ${temp} does already exist. That is unusual...`
+    );
+  }
+
+  if (!fs.existsSync(temp)) {
+    fs.mkdirSync(temp);
+  }
+
+  getMKVs.forEach(async (mkv, index) => {
+    try {
+      let mkvPath = `${temp}/${mkv}`;
+      if (!fs.existsSync(`${mkvPath}.h265`))
+        return await extract.ExtractH265FromMKV(
+          mkvextract,
+          `${path}/${mkv}`,
+          `${temp}/${index + 1}`
+        );
+    } catch (error) {
+      console.log(error);
+    }
+  });
+
   // Get H265 files that we need
 
   const getH265Files = findFiles(path, ".h265");
   if (getH265Files.length <= 0)
-    return console.log("Faild to find any H265 video streams");
+    return console.log(
+      chalk.red("[ERROR]") + " Faild to find any H265 video streams"
+    );
 
   console.log("============================================");
   console.log(
@@ -44,12 +81,29 @@ const ffprobe = "ffprobe" || "";
       "Extracting DV Metdata......."
   );
 
-  // First extract the DV metadata from the Files
+  // extract the DV metadata from the Files
 
   getH265Files.forEach(async (episode) => {
-    if (!fs.existsSync(`${path}/${episode}.bin`))
-      return await extract.DolbyVision(path, episode, doviToolPath);
+    try {
+      let epiodesPath = `${path}/${episode}`;
+      if (!fs.existsSync(`${epiodesPath}.bin`))
+        return await extract.DolbyVision(
+          `${epiodesPath}`,
+          doviToolPath,
+          `${epiodesPath}`
+        );
+    } catch (error) {
+      console.log(error.message);
+    }
   });
+
+  // Extract the Master Display Parameters
+
+  await extract.MasterDisplay(
+    ffprobe,
+    `${path}/${getMKVs[0]}`,
+    `${temp}/MasterDisplay`
+  );
 
   // get all vpy scripts and DV metadata files
 

@@ -1,7 +1,7 @@
 const childProcess = require("child_process");
 
 class Extract {
-  async DolbyVision(videosPath, episode, doviToolPath) {
+  async DolbyVision(episode, doviToolPath, output) {
     try {
       if (!doviToolPath)
         return console.log(
@@ -9,7 +9,7 @@ class Extract {
         );
 
       childProcess.execSync(
-        `${doviToolPath} -m 2 --crop extract-rpu "${videosPath}/${episode}" --rpu-out "${videosPath}/${episode}.bin"
+        `${doviToolPath} --crop extract-rpu "${episode}" --rpu-out "${output}.bin"
     `,
         {
           stdio: "inherit",
@@ -24,7 +24,7 @@ class Extract {
     try {
       if (!ffprobe) return console.log("Please add ffprobe to path!");
       childProcess.execSync(
-        `${ffprobe} -hide_banner -select_streams v -print_format json -show_frames -read_intervals "%+#1" -show_entries "frame=color_space,color_primaries,color_transfer,side_data_list,pix_fmt" -i "${mkv}" > "${tempPath}"`,
+        `${ffprobe} -hide_banner -select_streams v -print_format json -show_frames -read_intervals "%+#1" -show_entries "frame=color_space,color_primaries,color_transfer,side_data_list,pix_fmt" -i "${mkv}" > "${tempPath}.json"`,
         {
           stdio: "inherit",
         }
@@ -34,11 +34,14 @@ class Extract {
     }
   }
 
-  async ExtractH265FromMKV(mkvextract, mkv) {
+  async ExtractH265FromMKV(mkvextract, input, output) {
     try {
-      childProcess.execSync(`${mkvextract} ${mkv} tracks 0:${mkv}.h265`, {
-        stdio: "inherit",
-      });
+      childProcess.execSync(
+        `${mkvextract} "${input}" tracks 0:"${output}.h265"`,
+        {
+          stdio: "inherit",
+        }
+      );
     } catch (error) {
       throw error;
     }
