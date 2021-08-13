@@ -1,12 +1,23 @@
 // Make sure that you have your vpy scripts, episodes and DV metadata in one folder. The script will scan the folder recursively and check for the files and if everything is okay it will start immediatly
 
+// Nodejs
+
 let path = process.argv[2];
-const { findFiles } = require("./module/getFiles");
-const { extract } = require("./module/extract_dovi");
-const { encodeEpisodes } = require("./module/encodeEpisodes");
-const chalk = require("chalk");
 const fs = require("fs");
+
+// npm modules
+const chalk = require("chalk");
+
+// Custom modules
+
+const { findFiles } = require("./module/getFiles");
+const { extract } = require("./module/extract");
+const { encodeEpisodes } = require("./module/encodeEpisodes");
+
+// executables paths (do not edit if they are added to path)
+
 const doviToolPath = "dovi_tool.exe" || "";
+const ffprobe = "ffprobe" || "";
 
 (async function () {
   if (path === undefined) {
@@ -20,8 +31,7 @@ const doviToolPath = "dovi_tool.exe" || "";
 
   // Get H265 files that we need
 
-  const getH265Files = findFiles(path, ".mkv");
-  console.log(getH265Files);
+  const getH265Files = findFiles(path, ".h265");
   if (getH265Files.length <= 0)
     return console.log("Faild to find any H265 video streams");
 
